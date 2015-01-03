@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<!--
+Copyright 2014, 2015 Michinobu Maeda.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html lang="ja">
+    <head>
+        {% include "templates/head.html" %}
+        <link rel="image_src" href="/images/{{ key }}/0.jpeg">
+        <meta property="og:image" content="http://puzzle15tiles.appspot.com/images/{{ key }}/0.jpeg">
+        <meta property="og:image:secure_url" content="https://puzzle15tiles.appspot.com/images/{{ key }}/0.jpeg">
+        <title>{{title}} - My15T-Puzzle</title>
+    </head>
+    <body>
+        {% include "templates/fbscripts.html" %}
+        <div class="container">
+            <div id="header" class="row">
+                <div class="col-xs-12 text-center">
+                    <h1>{{ title }}</h1>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12 text-center">
+                    <div id="puzzle-frame">
+                        <img id="default-image"
+                             src="{% if 0 == image_count %}{{ defaultImage }}{% else %}/images/{{ key }}/0.jpeg{% endif %}"
+                             alt="画像 #1">
+                    </div>
+                </div>
+            </div>
+            {% if url or owner -%}
+            <div class="row">
+                <div class="col-xs-12 col-sm-8 col-lg-6 col-sm-offset-2 col-lg-offset-3 text-center">
+                    <p class="lead">{% if owner %}{{ owner }}<br>{% endif -%}
+                    {%- if url %}<a href="{{ url }}">{{ url }}</a>{% endif %}</p>
+                </div>
+            </div>
+            {%- endif %}
+            {% if qrcode -%}
+            <p class="text-center">
+                このページのQRコード<br>
+                <img src="{{ qrcode }}" alt="QR Code">
+            </p>
+            {%- endif %}
+            {% include "templates/gotoedit.html" %}
+            <div class="row">
+                <div class="col-xs-12 text-center">
+                    {% include "templates/adds.html" %}
+                </div>
+            </div>
+            {% include "templates/footer.html" %}
+        </div>
+        {% include "templates/foot.html" %}
+<script>
+
+$(document).ready(function() {
+    $(".twitter-share-button").attr("data-text", $("title").text());
+    $("#default-image").remove()
+    if (0 < {{ image_count }}) {
+        images = Array();
+        for (var i = 0; i < {{ image_count }}; ++i) {
+            images[i] = "/images/" + "{{ key }}" + "/" + i + ".jpeg"
+        }
+        initPuzzle(images);
+    } else {
+        initPuzzle(Array("/html/numbers1.png"));
+    }
+});
+</script>
+    </body>
+</html>

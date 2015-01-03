@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<!--
+Copyright 2014 Michinobu Maeda.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta property="og:image" content="http://puzzle15tiles.appspot.com/html/numbers1.png">
+        <meta property="og:image:secure_url" content="https://puzzle15tiles.appspot.com/html/numbers1.png">
+        <link rel="apple-touch-icon" href="touch-icon-iphone.png">
+        <link rel="apple-touch-icon" sizes="76x76" href="touch-icon-ipad.png">
+        <link rel="apple-touch-icon" sizes="120x120" href="touch-icon-iphone-retina.png">
+        <link rel="apple-touch-icon" sizes="152x152" href="touch-icon-ipad-retina.png">
+        <!--[if lt IE 9]>
+            <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+        <script>
+
+var tileCount = 4;
+var tileSize = 80;
+var frameSize = tileSize * tileCount;
+var tileBorderWidth = 2;
+var pos = Array();
+var gap = tileCount * tileCount - 1;
+var frame;
+var tile = Array();
+var img = Array();
+var timer = 0;
+var isActive = false;
+var src = "numbers1.png";
+
+function onLoad() {
+
+    frame = document.getElementById("puzzle-frame");
+    
+    for (var i = 0; i < (tileCount * tileCount); ++i) {
+
+        pos[i] = i;
+        tile[i] = document.getElementById("t" + i);
+        img[i] = document.getElementById("i" + i);
+    }
+
+    setImage();
+}
+
+function onTileClick(tile) {
+    
+    if (isActive != true) { return; }
+
+    if (swapTiles(tile)) {
+
+        updatePosition();
+
+        if (isComplete()) {
+            active = false;
+
+            timer = window.setTimeout(function() {
+                setImage();
+            }, 1000);
+        }
+    }
+}
+
+function onImageClick(source) {
+    src = source.src;
+    setImage();
+}
+
+function setImage() {
+
+    if (timer) { window.clearTimeout(timer); }
+    updateImage(0);
+
+    timer = window.setTimeout(function() {
+        splitImage();
+    }, 1000);
+}
+
+function splitImage() {
+
+    updateImage(tileBorderWidth);
+
+    timer = window.setTimeout(function() {
+        createGap();
+    }, 1000);
+}
+
+function createGap() {
+
+    img[gap].style.opacity = 0.0;
+    tile[gap].style.border = "none";
+
+    timer = window.setTimeout(function() {
+        shaffleTiles();
+    }, 1000);
+}
+
+function shaffleTiles() {
+
+    var shaffleCount = 0;
+
+    timer = window.setInterval(function() {
+
+        ++ shaffleCount;
+        while (false == swapTiles(Math.floor(Math.random() * 16))) {}
+        updatePosition();
+
+        if (100 < shaffleCount) {
+            window.clearTimeout(timer);
+            isActive = true;
+        }
+    }, 10);
+}
+
+function updateImage(borderWidth) {
+
+    frame.style.width = "" + frameSize + "px";
+    frame.style.height = "" + frameSize + "px";
+    
+    for (var i = 0; i < (gap + 1); ++i) {
+
+        pos[i] = i;
+
+        tile[i].style.width = "" + (tileSize - borderWidth * 2) + "px";
+        tile[i].style.height = "" + (tileSize - borderWidth * 2) + "px";
+        tile[i].style.marginTop = "" + (Math.floor(pos[i] / tileCount) * tileSize) + "px";
+        tile[i].style.marginRight = "0px";
+        tile[i].style.marginBottom = "0px";
+        tile[i].style.marginLeft = "" + (pos[i] % tileCount * tileSize) + "px";
+        tile[i].style.borderTop = "solid " + borderWidth + "px #ddd";
+        tile[i].style.borderRight = "solid " + borderWidth + "px #666";
+        tile[i].style.borderBottom = "solid " + borderWidth + "px #666";
+        tile[i].style.borderLeft = "solid " + borderWidth + "px #ddd";
+
+        img[i].src = src;
+        img[i].style.width = "" + frameSize + "px";
+        img[i].style.height = "" + frameSize + "px";
+        img[i].style.marginTop = "" + (Math.floor(i / tileCount) * tileSize * -1 - borderWidth) + "px";
+        img[i].style.marginRight = "0px";
+        img[i].style.marginBottom = "0px";
+        img[i].style.marginLeft = "" + (i % tileCount * tileSize * -1 - borderWidth) + "px";
+        img[i].style.opacity = 1.0;
+        img[i].style.visibility = "visible";
+    }
+}
+
+function updatePosition() {
+
+    for (var i = 0; i < tile.length; ++i) {
+        tile[i].style.marginTop = "" + (Math.floor(pos[i] / tileCount) * tileSize) + "px";
+        tile[i].style.marginLeft = "" + (pos[i] % tileCount * tileSize) + "px";
+    }
+}
+
+function isComplete() {
+    for (var i = 0; i < tile.length; ++i) {
+        if (i != pos[i]) { return false; }
+    }
+    return true;
+}
+
+function swapTiles(tile) {
+
+    var delta = 0;
+
+    if (tile < 0) { return false; }
+
+    if ((Math.floor(pos[tile] / tileCount)) == (Math.floor(pos[gap] / tileCount))) {
+        delta = (pos[tile] < pos[gap]) ? -1 : 1;            
+    } else if ((pos[tile] % tileCount) == (pos[gap] % tileCount)) {
+        delta = (pos[tile] < pos[gap]) ? -tileCount : tileCount;            
+    }
+    
+    if (delta == 0) { return false; }
+    
+    var stop = pos[tile];
+    
+    for (var i = pos[gap]; i != stop; i += delta) {
+        for (var j = 0; j < (tileCount * tileCount); ++j) {
+            if (pos[j] == (i + delta)) {
+                pos[j] = i;
+                break;
+            }
+        }
+        pos[gap] = i + delta;
+    }
+        
+    return true;
+}
+        </script>        
+        <style type="text/css">
+body {
+    background-color: #eee;
+    margin: 0;
+    padding: 0;
+}
+#content {
+    text-align: center;
+    width: 100%;
+    margin: 32px 0 32px 0;
+}
+#puzzle-frame {
+    background-color: #ccc;
+    display: inline-block;
+    width: 320px;
+    height: 320px;
+    border-top: solid 2px #666;
+    border-right: solid 2px #ddd;
+    border-bottom: solid 2px #ddd;
+    border-left: solid 2px #666;
+}
+.tile {
+    width: 80px;
+    height: 80px;
+    position: absolute;
+    display: block;
+    overflow: hidden;
+}
+.tile img {
+    visibility: hidden;
+}
+#images {
+    padding: 32px 4px 16px 4px;
+}
+.tn {
+    width: 64px;
+    height: 64px;
+    border-top: solid 1px #ddd;
+    border-right: solid 1px #666;
+    border-bottom: solid 1px #666;
+    border-left: solid 1px #ddd;
+    margin: 4px 4px 4px 4px;
+}
+.fb-like {
+    margin-top: 16px;
+}
+        </style>
+        <title>15 Puzzle</title>
+    </head>
+    <body onload="onLoad()">
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/ja_JP/sdk.js#xfbml=1&version=v2.0";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+        <div id="content">
+            <div id="puzzle-frame">
+                <div class="tile" id="t0"><img id="i0" src="numbers1.png" alt="Tile 0" onclick="onTileClick(0)"/></div>
+                <div class="tile" id="t1"><img id="i1" src="numbers1.png" alt="Tile 1" onclick="onTileClick(1)"/></div>
+                <div class="tile" id="t2"><img id="i2" src="numbers1.png" alt="Tile 2" onclick="onTileClick(2)"/></div>
+                <div class="tile" id="t3"><img id="i3" src="numbers1.png" alt="Tile 3" onclick="onTileClick(3)"/></div>
+                <div class="tile" id="t4"><img id="i4" src="numbers1.png" alt="Tile 4" onclick="onTileClick(4)"/></div>
+                <div class="tile" id="t5"><img id="i5" src="numbers1.png" alt="Tile 5" onclick="onTileClick(5)"/></div>
+                <div class="tile" id="t6"><img id="i6" src="numbers1.png" alt="Tile 6" onclick="onTileClick(6)"/></div>
+                <div class="tile" id="t7"><img id="i7" src="numbers1.png" alt="Tile 7" onclick="onTileClick(7)"/></div>
+                <div class="tile" id="t8"><img id="i8" src="numbers1.png" alt="Tile 8" onclick="onTileClick(8)"/></div>
+                <div class="tile" id="t9"><img id="i9" src="numbers1.png" alt="Tile 9" onclick="onTileClick(9)"/></div>
+                <div class="tile" id="t10"><img id="i10" src="numbers1.png" alt="Tile 10" onclick="onTileClick(10)"/></div>
+                <div class="tile" id="t11"><img id="i11" src="numbers1.png" alt="Tile 11" onclick="onTileClick(11)"/></div>
+                <div class="tile" id="t12"><img id="i12" src="numbers1.png" alt="Tile 12" onclick="onTileClick(12)"/></div>
+                <div class="tile" id="t13"><img id="i13" src="numbers1.png" alt="Tile 13" onclick="onTileClick(13)"/></div>
+                <div class="tile" id="t14"><img id="i14" src="numbers1.png" alt="Tile 14" onclick="onTileClick(14)"/></div>
+                <div class="tile" id="t15"><img id="i15" src="numbers1.png" alt="Tile 15" onclick="onTileClick(15)"/></div>
+            </div>
+            <div id="images">
+                <img class="tn" onclick="onImageClick(this)" src="numbers1.png" alt="Numbers #1"/>
+                <img class="tn" onclick="onImageClick(this)" src="alphabets1.png" alt="Alphabet #1"/>
+                <img class="tn" onclick="onImageClick(this)" src="flower1.jpg" alt="Flower #1"/>
+                <img class="tn" onclick="onImageClick(this)" src="shape1.jpg" alt="Shape #1"/>
+            </div>
+            <div id="footer">
+
+<div class="fb-like" data-href="http://puzzle15tiles.appspot.com/html/index.html" data-layout="button" data-action="like" data-show-faces="false" data-share="true"></div><br>
+<p></p><a class="twitter-share-button" href="http://puzzle15tiles.appspot.com/html/index.html"
+  data-related="mixnb"
+  data-size="medium "
+  data-count="none">
+Tweet
+</a></p>
+<script type="text/javascript">
+window.twttr=(function(d,s,id){var t,js,fjs=d.getElementsByTagName(s)[0];if(d.getElementById(id)){return}js=d.createElement(s);js.id=id;js.src="https://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);return window.twttr||(t={_e:[],ready:function(f){t._e.push(f)}})}(document,"script","twitter-wjs"));
+</script>
+
+                Copyright 2014 <a href="https://sites.google.com/site/michinobumaeda/">Michinobu Maeda</a>.
+            </div>
+        </div>
+    </body>
+</html>

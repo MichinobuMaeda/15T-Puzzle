@@ -1,0 +1,41 @@
+
+{% if status == "ok" %}
+            <div class="row" id="backtoedit">
+                <div class="col-xs-12 col-sm-8 col-lg-6 col-sm-offset-2 col-lg-offset-3 text-center well well-sm">
+                    <p id="loginuser">{{name}} さんは<br>{{type}} でログインしています。</p>
+                    <div>
+                        <button class="btn btn-default btn-sm"
+                                onclick="javascript:window.location.href = '/logout'">
+                            ログアウト
+                        </button>
+                        <button class="btn btn-primary btn-sm"
+                                onclick="javascript:window.location.href = '/edit/{{ key }}'">
+                            編集する
+                        </button>
+                    </div>
+                </div>
+            </div>
+{% else %}
+            <div class="row" id="gotoedit">
+                <div class="col-xs-12 col-sm-8 col-lg-6 col-sm-offset-2 col-lg-offset-3 text-center well well-sm">
+                    <p class="lead">あなたの写真やイラストで<br>自分だけのパズルをつくろう!!</p>
+                    <p>アカウントを選んでください。</p>
+                    <button class="btn btn-default btn-sm" style="color: #2fa6ff;"
+                            onclick="javascript:window.location.href = '/authreq/twitter'">
+                        Twitter
+                    </button>
+                    <button class="btn btn-default btn-sm" style="color: #0052d6;"
+                            onclick="javascript:window.location.href = '/authreq/facebook'">
+                        Facebook
+                    </button>
+                    <button class="btn btn-default btn-sm" style="color: #b00;"
+                            onclick="javascript:window.location.href = '/authreq/google'">
+                        Google
+                    </button>
+                    <button class="btn btn-default btn-sm" style="color: #ac7e35;"
+                            onclick="javascript:window.location.href = '/authreq/github'">
+                        GitHub
+                    </button>
+                </div>
+            </div>
+{% endif %}

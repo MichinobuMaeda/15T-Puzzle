@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<!--
+Copyright 2014 Michinobu Maeda.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+-->
+<html lang="ja">
+    <head>
+        {% include "templates/head.html" %}
+        <meta http-equiv="refresh" content="3600">
+        <title>パズルを編集する - My15T-Puzzle</title>
+    </head>
+    <body>
+        {% include "templates/fbscripts.html" %}
+        <div class="container">
+            <div id="header" class="row">
+                <div class="col-xs-12 col-sm-8 col-lg-6 col-sm-offset-2 col-lg-offset-3">
+                    {% if err %}<p class="alert alert-danger">{{err}}</p>{% endif %}
+                    {% if msg %}<p class="alert alert-info">{{msg}}</p>{% endif %}
+                </div>
+                <div class="col-xs-12 text-center">
+                    <h1>パズルを編集する</h1>
+                </div>
+            </div>
+            <div id="header" class="row">
+                <div id="edit-area"
+                     class="col-xs-12 col-sm-8 col-lg-6 col-sm-offset-2 col-lg-offset-3">
+                    <h3>URL</h3>
+                    <p><a id="showurl" href="/{{key}}">https://puzzle15tiles.appspot.com/{{key}}</a></p>
+                    <div class="row form-area">
+                        <form id="form-title" action="/update/title/{{key}}" method="post">
+                            <div class="col-xs-9">
+                                <input class="form-control" type="text" name="title" id="title"
+                                       value="{{ title }}" placeholder="タイトルを決めてください">
+                            </div>
+                            <div class="col-xs-3">
+                                <button id="submit-title" type="submit" class="btn btn-primary">決定</button>
+                            </div>
+                        </form>
+                    </div>
+                    {% for i in images -%}
+                    <div class="row form-area">
+                        <form id="form-image" action="/update/del-image/{{key}}" method="post">
+                            <div class="col-xs-9">
+                                <img class="sample-image" src="/images/{{ key }}/{{ i }}.jpeg" alt="画像 #{{ i }}">
+                            </div>
+                            <input type="hidden" name="del-image" value="{{ i }}">
+                            <div class="col-xs-3 btn-area-del-image">
+                                <button id="submit-image{{ i }}" type="submit"
+                                        class="btn btn-warning btn-del-image">削除</button>
+                            </div>
+                        </form>
+                    </div>
+                    {%- endfor %}
+                    <div class="row form-area">
+                        <form id="form-image" action="/upload/{{key}}" method="post"
+                              enctype="multipart/form-data">
+                            <div class="col-xs-9">
+                                <input class="form-control" type="file" name="image" id="image">
+                            </div>
+                            <div class="col-xs-3">
+                                <button id="submit-title" type="submit" class="btn btn-primary">追加</button>
+                            </div>
+                        </form>
+                    </div>
+                    <h3>オプション</h3>
+                    <div class="row form-area">
+                        <form id="form-owner" action="/update/owner/{{key}}" method="post">
+                            <div class="col-xs-9">
+                                <input class="form-control" type="text" name="owner" id="owner"
+                                       value="{{ owner }}" placeholder="お名前／ペンネーム">
+                            </div>
+                            <div class="col-xs-3">
+                                <button id="submit-owner" type="submit" class="btn btn-primary">決定</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="row form-area">
+                        <form id="form-url" action="/update/url/{{key}}" method="post">
+                            <div class="col-xs-9">
+                                <input class="form-control" type="text" name="url" id="url"
+                                       value="{{ url }}" placeholder="自分のホームページのURL">
+                            </div>
+                            <div class="col-xs-3">
+                                <button id="submit-url" type="submit" class="btn btn-primary">決定</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div id="footer" class="row well well-sm">
+                <div class="col-xs-12">
+                    <p id="logout">
+                        <span id="loginuser">{{name}} さん</span>
+                        <button class="btn btn-default btn-sm"
+                                onclick="window.location.href = '/logout'">
+                            ログアウト
+                        </button>
+                    </p>
+                    <p id="copyright">
+                        <a href="/">My15T-Puzzle</a><br>
+                        Copyright 2014, 2015
+                        <a href="https://sites.google.com/site/michinobumaeda/">Michinobu Maeda</a>.
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% include "templates/foot.html" %}
+<script>
+
+function logout() {
+    if (accountType == "fb") {
+        FB.logout(function(response) {
+            window.location.href = "/";
+        });
+    }
+}
+
+function initPage() {
+    if (accountData.name) {
+        $("#loginuser").text(accountData.name + " さん");
+    } else {
+        $("#loginuser").text(accountData.first_name + " さん");
+    }
+    $("#showurl").attr("href", window.location.pathname.replace("/edit/", "/"));
+    $("#showurl").text(window.location.href.replace("/edit/", "/"));
+
+    $.getJSON(window.location.pathname.replace("/edit/", "/get/") +
+              "/" + accountType + "/" + accountData.id + "/" + accessToken, function (data) {
+        if (data.status == "ok") {
+            $("#edit-area").show();
+            $("#form-usertitle").attr(
+                "action", window.location.pathname.replace("/edit/", "/update/") +
+                "/usertitle/" + accountType + "/" + accountData.id + "/" + accessToken);
+            $("#form-username").attr(
+                "action", window.location.pathname.replace("/edit/", "/update/") +
+                "/username/" + accountType + "/" + accountData.id + "/" + accessToken);
+            $("#form-userurl").attr(
+                "action", window.location.pathname.replace("/edit/", "/update/") +
+                "/userurl/" + accountType + "/" + accountData.id + "/" + accessToken);
+            $("#usertitle").attr("value", data.title);
+            $("#username").attr("value", data.owner);
+            $("#userurl").attr("value", data.url);
+
+            if (data.title == "") {
+                window.setTimeout(function() {
+                    if (accountData.name) {
+                        $("#usertitle").attr("value", accountData.name + "さんのパズル");
+                    } else {
+                        $("#usertitle").attr("value", accountData.first_name + "さんのパズル");
+                    }
+                    $("#submit-usertitle").trigger("click");
+                }, 1000);
+            }
+        } else {
+            window.location.href = "/?msg=編集中のデータを取得できませんでした。#gotoedit";
+        }
+    });
+}
+</script>
+    </body>
+</html>
